@@ -9,6 +9,6 @@ public interface Features <E extends Entry>{
 	public void updateFromWindow(ArrayBlockingQueue<E> currentWindow);
 	public void reset();
 	public String[] header();
-	public String[] toRow();
+	public String[] toRow(Long startTime);		//this will allow features to print proper time
 
 }

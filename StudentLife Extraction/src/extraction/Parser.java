@@ -75,7 +75,7 @@ public class Parser <T extends Entry, E extends Features<T>> {
 	        		
 	        		//check if results from this window need to be printed
 	        		if(currentTime > (segmentSize + startTime)) {	//time we are at has exceeded current segment, need to print
-						this.writeLine(featureExtractor.toRow());	
+						this.writeLine(featureExtractor.toRow(startTime));
 						featureExtractor.reset();
 						startTime = currentTime;
 					}
@@ -100,10 +100,10 @@ public class Parser <T extends Entry, E extends Features<T>> {
 		for(int col = 0; col < rowToPrint.length; col ++) {
 			Cell cell = row.createCell(col);
 			try {
-				Double num = Double.parseDouble(rowToPrint[col]);
+				Double num = Double.parseDouble(rowToPrint[col]);	//if you can make it a double, do
 				cell.setCellValue(num);
 			} catch(NumberFormatException e) {
-				cell.setCellValue(rowToPrint[col]);
+				cell.setCellValue(rowToPrint[col]);		//otherwise just print a string
 			}
 		}
 		currentWriteRow++;

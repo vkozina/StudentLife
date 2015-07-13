@@ -7,10 +7,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import extraction.Features;
 
 public class AudioFeatures implements Features<AudioEntry> {
-	Set<Integer> audios;
-	long[] audioDurations;
-	int numChanges;
-	long previousTime;
+	private Set<Integer> audios;
+	private long[] audioDurations;
+	private int numChanges;
+	private long previousTime;
 	
 	public AudioFeatures() {
 		audios = new TreeSet<Integer>();
@@ -25,12 +25,11 @@ public class AudioFeatures implements Features<AudioEntry> {
 
 	//updates features per line
 	public void updateFromLine(AudioEntry entry) {
-		AudioEntry e = (AudioEntry) entry;
 		if(previousTime == -1)
-			previousTime = e.getTime();
+			previousTime = entry.getTime();
 		else {
-			int currentAudio = e.getInterference();
-			long currentTime = e.getTime();
+			int currentAudio = entry.getInterference();
+			long currentTime = entry.getTime();
 			long timeDifference = currentTime - previousTime;
 		
 			audioDurations[currentAudio] += timeDifference;
@@ -56,9 +55,9 @@ public class AudioFeatures implements Features<AudioEntry> {
 		numChanges = 0;
 	}
 
-	public String[] toRow() {	//create row from features collected
+	public String[] toRow(Long startTime) {	//create row from features collected
 		String[] row = new String[7];
-		row[0] = Long.toString(previousTime);
+		row[0] = Long.toString(startTime);
 		row[1] = Integer.toString(audios.size());
 		row[2] = Integer.toString(numChanges);
 		row[3] = Long.toString(audioDurations[0]);

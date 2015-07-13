@@ -56,9 +56,9 @@ public class ActivityFeatures implements Features<ActivityEntry> {
 		numChanges = 0;
 	}
 
-	public String[] toRow() {	//create row from features collected
+	public String[] toRow(Long startTime) {	//create row from features collected
 		String[] row = new String[7];
-		row[0] = Long.toString(previousTime);
+		row[0] = Long.toString(startTime);
 		row[1] = Integer.toString(activities.size());
 		row[2] = Integer.toString(numChanges);
 		row[3] = Long.toString(activityDurations[0]);
