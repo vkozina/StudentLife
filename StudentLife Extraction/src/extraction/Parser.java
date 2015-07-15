@@ -54,32 +54,35 @@ public class Parser <T extends Entry, E extends Features<T>> {
 			//if there are still lines to read
 			if ((nextLine = reader.readNext()) != null) {
 			  	current = (T) featureExtractor.getEntry(nextLine);
-			  	featureExtractor.updateFromLine(current);
-	        	
-			  	//add new element to the window
-	        	if(!currentWindow.offer(current)) {				//window is full of entries, offer puts if there is space
-					currentWindow.remove();						//remove the oldest entry
-					currentWindow.put(current);					//replace it with newest data
-				}
-	        	
-	        	if(startTime == -1)								//initialize start
-	        		startTime = current.getTime();
-	        	
-	        	currentTime = current.getTime();				//update values to reflect parsed data
-	        	stepCounter++;
-	        	
-	        	//check if new window has been completed
-	        	if(stepCounter >= step) {
-	        		featureExtractor.updateFromWindow(currentWindow);		//update features from the window
-	        		stepCounter = 0;
-	        		
-	        		//check if results from this window need to be printed
-	        		if(currentTime > (segmentSize + startTime)) {	//time we are at has exceeded current segment, need to print
-						this.writeLine(featureExtractor.toRow(startTime));
-						featureExtractor.reset();
-						startTime = currentTime;
+			  	//if the entry received should be considered
+			  	if(current != null) {
+				  	featureExtractor.updateFromLine(current);
+		        	
+				  	//add new element to the window
+		        	if(!currentWindow.offer(current)) {				//window is full of entries, offer puts if there is space
+						currentWindow.remove();						//remove the oldest entry
+						currentWindow.put(current);					//replace it with newest data
 					}
-	        	}
+		        	
+		        	if(startTime == -1)								//initialize start
+		        		startTime = current.getTime();
+		        	
+		        	currentTime = current.getTime();				//update values to reflect parsed data
+		        	stepCounter++;
+		        	
+		        	//check if new window has been completed
+		        	if(stepCounter >= step) {
+		        		featureExtractor.updateFromWindow(currentWindow);		//update features from the window
+		        		stepCounter = 0;
+		        		
+		        		//check if results from this window need to be printed
+		        		if(currentTime > (segmentSize + startTime)) {	//time we are at has exceeded current segment, need to print
+							this.writeLine(featureExtractor.toRow(startTime));
+							featureExtractor.reset();
+							startTime = currentTime;
+						}
+		        	}
+			  	}
 	        }
 			
 	        else
@@ -96,16 +99,18 @@ public class Parser <T extends Entry, E extends Features<T>> {
 	
 	public void writeLine(String[] rowToPrint) throws IOException {
 		HSSFSheet sheet = writeTo.getSheetAt(0);
-		Row row = sheet.createRow(currentWriteRow);
-		for(int col = 0; col < rowToPrint.length; col ++) {
-			Cell cell = row.createCell(col);
-			try {
-				Double num = Double.parseDouble(rowToPrint[col]);	//if you can make it a double, do
-				cell.setCellValue(num);
-			} catch(NumberFormatException e) {
-				cell.setCellValue(rowToPrint[col]);		//otherwise just print a string
+		if(rowToPrint != null) {	//if there is something to print
+			Row row = sheet.createRow(currentWriteRow);
+			for(int col = 0; col < rowToPrint.length; col ++) {
+				Cell cell = row.createCell(col);
+				try {
+					Double num = Double.parseDouble(rowToPrint[col]);	//if you can make it a double, do
+					cell.setCellValue(num);
+				} catch(NumberFormatException e) {
+					cell.setCellValue(rowToPrint[col]);		//otherwise just print a string
+				}
 			}
+			currentWriteRow++;
 		}
-		currentWriteRow++;
 	}
 }
