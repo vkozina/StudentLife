@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import call_log.CallEntry;
 import extraction.Features;
 
 public class AudioFeatures implements Features<AudioEntry> {
@@ -20,7 +21,11 @@ public class AudioFeatures implements Features<AudioEntry> {
 	}
 	
 	public AudioEntry getEntry(String[] row) {
-		return new AudioEntry(row);
+		AudioEntry entry = new AudioEntry(row);
+		if(entry.isValid())
+			return entry;
+		else
+			return null;
 	}
 
 	//updates features per line
@@ -31,7 +36,7 @@ public class AudioFeatures implements Features<AudioEntry> {
 			int currentAudio = entry.getInterference();
 			long currentTime = entry.getTime();
 			long timeDifference = currentTime - previousTime;
-		
+			
 			audioDurations[currentAudio] += timeDifference;
 			previousTime = currentTime;
 		}

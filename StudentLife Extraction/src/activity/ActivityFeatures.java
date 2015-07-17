@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import audio.AudioEntry;
 import extraction.Features;
 
 public class ActivityFeatures implements Features<ActivityEntry> {
@@ -20,7 +21,11 @@ public class ActivityFeatures implements Features<ActivityEntry> {
 	}
 	
 	public ActivityEntry getEntry(String[] row) {
-		return new ActivityEntry(row);
+		ActivityEntry entry = new ActivityEntry(row);
+		if(entry.isValid())
+			return entry;
+		else
+			return null;
 	}
 
 	//updates features per line
@@ -32,7 +37,7 @@ public class ActivityFeatures implements Features<ActivityEntry> {
 			int currentActivity = e.getActivity();
 			long currentTime = e.getTime();
 			long timeDifference = currentTime - previousTime;
-		
+			
 			activityDurations[currentActivity] += timeDifference;
 			previousTime = currentTime;
 		}

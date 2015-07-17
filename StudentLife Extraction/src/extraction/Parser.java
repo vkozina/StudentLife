@@ -1,6 +1,9 @@
 package extraction;
 
 import java.lang.Boolean;
+
+//TODO sort file by time first
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -89,7 +92,6 @@ public class Parser <T extends Entry, E extends Features<T>> {
 	        	currentWindow.remove(); 						//nothing to add to the window, still remove oldest entries
 			
 			done = currentWindow.isEmpty();						//if there's nothing left in the queue we are done
-	        reader.readNext();									//data every other line
 		}
 		
 		writeTo.write(out);
