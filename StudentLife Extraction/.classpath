@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="C:/Users/Valentina/Documents/Java software/excelreader.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Valentina/Documents/Java software/opencsv-3.4.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Valentina/Documents/Java software/poi-3.12/poi-3.12-20150511.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Valentina/Documents/Java software/javacsv.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

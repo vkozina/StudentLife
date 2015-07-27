@@ -10,22 +10,18 @@ import java.util.concurrent.ArrayBlockingQueue;
 import audio.AudioEntry;
 import extraction.Features;
 
-
-//TODO split into caller features and call features (aka significant contacts)
-//TODO dates, fix them
-
 public class CallFeatures implements Features<CallEntry> {
 	private int numCalls;
 	private HashSet<String> uniqueCalls;	//keeps track of unique numbers to have called in window
 	private long totalCallDuration;
 	private int inContacts;
 	private int[] type; //empty, ingoing, outgoing, missed
+	private int numSignificant;
+	private HashMap<String, Contact> contacts;	//contacts uniquely identified by number
 	
-	//TODO figure out how to best incorporate ContactFeatures
-	
-	
-	public CallFeatures() {
+	public CallFeatures(HashMap<String, Contact> contacts) {
 		uniqueCalls = new HashSet<String>();
+		this.contacts = contacts;
 		reset();		
 	}
 	
@@ -45,6 +41,9 @@ public class CallFeatures implements Features<CallEntry> {
 		if(entry.isContact())
 			inContacts++;
 		type[entry.getCallType()]++;
+		Contact contact = contacts.get(entry.getCallNumber());
+		if(contact != null && contact.isSig())
+			this.numSignificant++;
 	}
 
 	public void updateFromWindow(ArrayBlockingQueue<CallEntry> currentWindow) {
@@ -52,12 +51,12 @@ public class CallFeatures implements Features<CallEntry> {
 	}
 
 	public void reset() {
-		numCalls = 0; uniqueCalls.clear(); totalCallDuration = 0; inContacts = 0;
+		numCalls = 0; uniqueCalls.clear(); totalCallDuration = 0; inContacts = 0; numSignificant = 0;
 		type = new int[4];
 	}
 
 	public String[] header() {
-		String[] row = new String[8];
+		String[] row = new String[9];
 		row[0] = "Time";
 		row[1] = "Num Calls";
 		row[2] = "Num Unique Calls";
@@ -66,11 +65,12 @@ public class CallFeatures implements Features<CallEntry> {
 		row[5] = "Num Ingoing";
 		row[6] = "Num Outgoing";
 		row[7] = "Num Missed";
+		row[8] = "Num Significant";
 		return row;
 	}
 
-	public String[] toRow(Long startTime) {
-		String[] row = new String[8];
+	public String[] updateFromSegment(Long startTime) {
+		String[] row = new String[9];
 		row[0] = Long.toString(startTime);
 		row[1] = Integer.toString(numCalls);
 		row[2] = Integer.toString(uniqueCalls.size());
@@ -79,6 +79,11 @@ public class CallFeatures implements Features<CallEntry> {
 		row[5] = Integer.toString(type[1]);
 		row[6] = Integer.toString(type[2]);
 		row[7] = Integer.toString(type[3]);
+		row[8] = Integer.toString(numSignificant);
 		return row;
+	}
+
+	public ArrayList<String[]> endData() {
+		return null;
 	}
 }
