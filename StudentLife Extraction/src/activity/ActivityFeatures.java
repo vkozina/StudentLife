@@ -1,5 +1,6 @@
 package activity;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -61,7 +62,7 @@ public class ActivityFeatures implements Features<ActivityEntry> {
 		numChanges = 0;
 	}
 
-	public String[] toRow(Long startTime) {	//create row from features collected
+	public String[] updateFromSegment(Long startTime) {		//create row from features collected
 		String[] row = new String[7];
 		row[0] = Long.toString(startTime);
 		row[1] = Integer.toString(activities.size());
@@ -83,6 +84,10 @@ public class ActivityFeatures implements Features<ActivityEntry> {
 		row[5] = "Time Running";
 		row[6] = "Time Unknown";
 		return row;
+	}
+
+	public ArrayList<String[]> endData() {
+		return null;
 	}
 
 }

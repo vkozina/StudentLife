@@ -7,7 +7,7 @@ public class ActivityEntry implements Entry {
 	private int activity;
 	
 	public ActivityEntry(String[] row) {
-		if(row[0].equals("")) {
+		if(row.length == 0 || row[0].equals("")) {
 			this.unixSecond = -1;
 			this.activity = -1;
 		}

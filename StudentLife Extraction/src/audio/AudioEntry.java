@@ -7,7 +7,7 @@ public class AudioEntry implements Entry {
 	private int interference;
 	
 	public AudioEntry(String[] row) {
-		if(row[0].equals("")) {
+		if(row.length == 0 || row[0].equals("")) {
 			this.unixSecond = -1;
 			this.interference = -1;
 		}

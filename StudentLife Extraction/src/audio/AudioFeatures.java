@@ -1,5 +1,6 @@
 package audio;
 
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -60,7 +61,7 @@ public class AudioFeatures implements Features<AudioEntry> {
 		numChanges = 0;
 	}
 
-	public String[] toRow(Long startTime) {	//create row from features collected
+	public String[] updateFromSegment(Long startTime) {	//create row from features collected
 		String[] row = new String[7];
 		row[0] = Long.toString(startTime);
 		row[1] = Integer.toString(audios.size());
@@ -82,6 +83,10 @@ public class AudioFeatures implements Features<AudioEntry> {
 		row[5] = "Time Noise";
 		row[6] = "Time Unknown";
 		return row;
+	}
+
+	public ArrayList<String[]> endData() {
+		return null;
 	}
 
 }
