@@ -3,9 +3,11 @@ package extraction;
 import java.io.File;
 import java.io.IOException;
 
+import sms.SMSEntry;
+import sms.SMSFeatures;
+import contacts.ContactFeatures;
 import call_log.CallEntry;
 import call_log.CallFeatures;
-import call_log.ContactFeatures;
 import activity.ActivityEntry;
 import activity.ActivityFeatures;
 import audio.AudioEntry;
@@ -14,58 +16,87 @@ import audio.AudioFeatures;
 public class Extraction {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		//TODO break up into helper functions
-		
-//		String dataType = "sensing\\activity";
-		String dataType = "call_log";
-		String path = "C:\\Users\\Valentina\\Documents\\StudentLife_Dataset\\dataset\\" + dataType + "\\";
+
+		DataType type = DataType.CALLS;
+		String path = "C:\\Users\\Valentina\\Documents\\StudentLife_Dataset\\dataset\\" + type + "\\";
 		int windowSize = 2;
 		int step = 1;
 		int segment = 1000;				//segment in seconds
 
-		String readFrom;// = path + dataType + "_u00.csv";
-		String writeTo;// = path + "features\\" + dataType + "_u00_features.csv";
+		String readFrom;
+		String writeTo;
 		
 		File dir = new File(path);
 		File[] directoryListing = dir.listFiles();
-		new File(path + "contactFeatures").mkdir();
-		new File(path + "callFeatures").mkdir();
-		new File(path + "sorted").mkdir();
+		
+		//only create sorted directory if necessary
+		if(type == DataType.CALLS || type == DataType.SMS) {
+			new File(path + "contactFeatures").mkdir();
+			new File(path + "sorted").mkdir();
+		}
+
+		new File(path + "features").mkdir();
+		
 		if (directoryListing != null) {
+			//cycles through all the files
 			for (File doc : directoryListing) {
 				readFrom = doc.getName();
-		    	//writeTo = path + "features\\"+ readFrom.substring(0, readFrom.lastIndexOf('.')) + "_features.csv";	//TODO do better
-		    	
-		    	/*
-		    	AudioFeatures extractor = new AudioFeatures();
-		    	Parser<AudioEntry, AudioFeatures> parser = 
-		    			new Parser<AudioEntry, AudioFeatures>(writeTo, windowSize, step, segment, extractor);
-	 			*/
-		    	
-		    	
-		    	/*
-		    	ActivityFeatures extractor = new ActivityFeatures();
-				Parser<ActivityEntry, ActivityFeatures> parser = 
-						new Parser<ActivityEntry, ActivityFeatures>(writeTo, windowSize, step, segment, extractor);
-		    	*/
+
+				Parser parser;
 				
-				writeTo = path + "contactFeatures\\"+ readFrom.substring(0, readFrom.lastIndexOf('.')) + "_features.csv";	//TODO do better
-		    	
-		    	SortFile s = new SortFile(doc);
-		    	doc = new File(s.getWriteLoc());
-		    	ContactFeatures extractor = new ContactFeatures();
-		    	Parser<CallEntry, ContactFeatures> parser = 
-		    			new Parser<CallEntry, ContactFeatures>(writeTo, windowSize, step, segment, extractor);
-		    	
-		    	parser.read(doc);
-		    	
-		    	writeTo = path + "callFeatures\\"+ readFrom.substring(0, readFrom.lastIndexOf('.')) + "_features.csv";	//TODO do better
-		    	
-		    	CallFeatures callExtractor = new CallFeatures(extractor.getContacts());
-		    	Parser<CallEntry, CallFeatures> callParser = 
-		    			new Parser<CallEntry, CallFeatures>(writeTo, windowSize, step, segment, callExtractor);
-		    	
-				callParser.read(doc);
+				//determines address of where to write. parser will create file if necessary
+				writeTo = path + "features\\"+ readFrom.substring(0, readFrom.lastIndexOf('.')) + "_features.csv";
+				
+				switch(type) {
+					case ACTIVITY: { 
+						ActivityFeatures extractor = new ActivityFeatures();
+						parser = new Parser<ActivityEntry, ActivityFeatures>(writeTo, windowSize, step, segment, extractor);
+						break;
+					}
+					
+					case AUDIO: {
+						AudioFeatures extractor = new AudioFeatures();
+				    	parser = new Parser<AudioEntry, AudioFeatures>(writeTo, windowSize, step, segment, extractor);
+				    	break;
+					}
+					
+					//need to extract contact information for both
+					case CALLS:
+					case SMS:
+					{
+						//creates the proper file name (with correct extension) for output doc
+						String writeName = doc.getName().replace(".csv", ".xls");
+						String writePath = doc.getAbsolutePath().replace(doc.getName(), "\\sorted\\" + writeName);
+						File writeFile = new File(writePath);					
+						
+						int col = type == DataType.CALLS ? 3 : 5;	//choose appropriate col to sort by (3 for calls, 5 for sms)
+						SortFile.sortByCol(doc, writeFile, col);
+				    	doc = writeFile;	//read from the sorted file from now on
+				    	
+				    	String contactWrite = path + "contactFeatures\\"+ readFrom.substring(0, readFrom.lastIndexOf('.')) + "_contact_features.csv";
+						ContactFeatures contactsExtractor = new ContactFeatures();
+				    	Parser<CallEntry, ContactFeatures> contactsParser = 
+				    			new Parser<CallEntry, ContactFeatures>(contactWrite, windowSize, step, segment, contactsExtractor);
+				    	
+				    	contactsParser.read(doc);
+			    	
+				    	if(type == DataType.CALLS) {
+					    	CallFeatures extractor = new CallFeatures(contactsExtractor.getContacts());
+					    	parser = new Parser<CallEntry, CallFeatures>(writeTo, windowSize, step, segment, extractor);
+						}
+				    	else {
+				    		SMSFeatures extractor = new SMSFeatures(contactsExtractor.getContacts());
+				    		parser = new Parser<SMSEntry, SMSFeatures>(writeTo, windowSize, step, segment, extractor);
+				    	}
+				    	break;
+					}
+					
+					default: {
+						parser = null;	//this line should never be reached
+					}
+				}
+				
+				parser.read(doc);
 				
 				//comment me to cycle through all the files in the given directory
 				break;

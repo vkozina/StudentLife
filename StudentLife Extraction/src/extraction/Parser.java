@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Row;
 
 import com.csvreader.CsvReader;
 
+//does all the reading of the file, as well as manages information extraction
 public class Parser <T extends Entry, E extends Features<T>> {
 	private HSSFWorkbook writeTo;
 	private FileOutputStream out;
@@ -49,6 +50,7 @@ public class Parser <T extends Entry, E extends Features<T>> {
 	    this.writeLine(featureExtractor.header());
 	}
 
+	//will appropriately read CSV and XLS files until the end, extracting data as it goes
 	public void read(File readFile) throws IOException, InterruptedException {
 		boolean isCSV = readFile.getName().endsWith(".csv");
 		FileInputStream file = new FileInputStream(readFile);
@@ -114,6 +116,8 @@ public class Parser <T extends Entry, E extends Features<T>> {
 			CSVreader.close();	
 	}
 	
+	//create an entry from line, adding it to the window if it exists, updating data as needed
+	//returns whether or not the entry created from the line was valid (as determined by the extractor)
 	private boolean parseLine(String [] line) throws InterruptedException, IOException {
 		T current = (T) featureExtractor.getEntry(line);
 	  	//if the entry received should be considered (null if does not contain proper info)
@@ -143,7 +147,7 @@ public class Parser <T extends Entry, E extends Features<T>> {
 	}
 	
 	private void endOfWindow() throws IOException {
-		featureExtractor.updateFromWindow(currentWindow);		//update features from the window
+		featureExtractor.updateFromWindow(currentWindow);		//update features in extractor from the window
 		stepCounter = 0;
 		
 		//check if results from this window need to be printed
@@ -154,6 +158,7 @@ public class Parser <T extends Entry, E extends Features<T>> {
 		}
 	}
 	
+	//prints all information returned by the extractor when the end of the readFile is reached
 	private void endOfFile() throws IOException {
 		ArrayList<String[]> data = featureExtractor.endData();
 		if(data != null)
